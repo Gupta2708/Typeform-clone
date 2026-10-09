@@ -20,7 +20,7 @@ export function InlineText({
       element.current.style.height = `${element.current.scrollHeight}px`;
     }
   }, [value]);
-  return (
+  const input = (
     <textarea
       ref={element}
       className={description ? "inline-description" : "inline-question-title"}
@@ -33,5 +33,14 @@ export function InlineText({
       maxLength={description ? 2000 : 500}
       onChange={(event) => onChange(event.target.value)}
     />
+  );
+  if (description) return input;
+  return (
+    <span className="inline-title-editor">
+      <span className="inline-title-mirror" aria-hidden="true">
+        {value || "Your question goes here"}
+      </span>
+      {input}
+    </span>
   );
 }

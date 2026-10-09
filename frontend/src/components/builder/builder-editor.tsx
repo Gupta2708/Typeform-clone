@@ -2,40 +2,35 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import * as Switch from "@radix-ui/react-switch";
 import {
   ArrowUpRight,
   Check,
-  ChevronDown,
   ChevronRight,
   Download,
-  GripVertical,
   Layers2,
   Monitor,
   Palette,
   Play,
   Plus,
-  Settings2,
   Smartphone,
 } from "lucide-react";
 import { useState } from "react";
 import { ApiError, formsApi } from "@/lib/api/client";
-import type { Answers, FormDetail, Question } from "@/lib/contracts";
-import { questionTypes } from "@/lib/question-types";
+import type {
+  Answers,
+  FormDetail,
+  Question,
+  QuestionType,
+} from "@/lib/contracts";
+import { makeQuestion, hasIncompatibleSettings } from "@/lib/editor/questions";
 import { useDraftEditor } from "@/hooks/use-draft-editor";
 import { InlineText } from "@/components/builder/inline-text";
+import { QuestionPicker } from "@/components/builder/question-picker";
+import { QuestionRail } from "@/components/builder/question-rail";
+import { QuestionSettings } from "@/components/builder/question-settings";
 import { QuestionContent } from "@/components/player/question-widget";
 import { Modal } from "@/components/ui/modal";
 import { Hint } from "@/components/ui/tooltip";
-
-export function TypeBadge({ question }: { question: Question }) {
-  const { icon: Icon, color } = questionTypes[question.type];
-  return (
-    <span className={`type-badge type-${color}`}>
-      <Icon size={15} />
-    </span>
-  );
-}
 
 export function BuilderEditor({ initial }: { initial: FormDetail }) {
   const router = useRouter();
@@ -51,6 +46,7 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
   const [live, setLive] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [notice, setNotice] = useState("");
+  const [validSettings, setValidSettings] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
   const [conflictDismissed, setConflictDismissed] = useState(false);
@@ -59,6 +55,12 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
     null,
   );
   const [reloading, setReloading] = useState(false);
+  const [picker, setPicker] = useState<"add" | "change" | null>(null);
+  const [typeChange, setTypeChange] = useState<QuestionType | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [formSettings, setFormSettings] = useState<"design" | "ending" | null>(
+    null,
+  );
   const question =
     definition.questions.find((item) => item.id === selected) ??
     definition.questions[0];
@@ -76,38 +78,94 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
     typeof window === "undefined"
       ? ""
       : `${window.location.origin}/to/${metadata.slug}`;
-
+  function replaceQuestion(next: Question) {
+    store.edit((draft) => ({
+      ...draft,
+      questions: draft.questions.map((item) =>
+        item.id === next.id ? next : item,
+      ),
+    }));
+  }
   function updateQuestion(
     patch: Partial<Pick<Question, "title" | "description" | "required">>,
   ) {
-    if (question)
-      store.edit((draft) => ({
-        ...draft,
-        questions: draft.questions.map((item) =>
-          item.id === question.id ? { ...item, ...patch } : item,
-        ),
-      }));
+    if (question) replaceQuestion({ ...question, ...patch });
   }
-  function addTextQuestion() {
-    const id = crypto.randomUUID();
-    const next: Question = {
-      id,
-      type: "short_text",
-      title: "",
-      description: "",
-      required: false,
-      settings: {},
-      options: [],
-    };
+  function select(id: string) {
+    if (!validSettings) {
+      setNotice(
+        "Fix the unsaved number range before selecting another question.",
+      );
+      return;
+    }
+    setSelected(id);
+    setPanel("canvas");
+  }
+  function clearPreview(id: string) {
+    setAnswers((previous) =>
+      Object.fromEntries(
+        Object.entries(previous).filter(([key]) => key !== id),
+      ),
+    );
+  }
+  function chooseType(type: QuestionType) {
+    if (picker === "change" && question) {
+      setPicker(null);
+      if (hasIncompatibleSettings(question, type)) {
+        setTypeChange(type);
+        return;
+      }
+      replaceQuestion(makeQuestion(type, question));
+      clearPreview(question.id);
+      return;
+    }
+    const next = makeQuestion(type);
     store.edit((draft) => ({
       ...draft,
       questions: [...draft.questions, next],
     }));
-    setSelected(id);
+    select(next.id);
     setLive(false);
-    setPanel("canvas");
+    setPicker(null);
+  }
+  function duplicateQuestion() {
+    if (!question) return;
+    const next = {
+      ...question,
+      id: crypto.randomUUID(),
+      options: question.options.map((option) => ({
+        ...option,
+        id: crypto.randomUUID(),
+      })),
+    } as Question;
+    store.edit((draft) => ({
+      ...draft,
+      questions: [
+        ...draft.questions.slice(0, index + 1),
+        next,
+        ...draft.questions.slice(index + 1),
+      ],
+    }));
+    select(next.id);
+  }
+  function deleteQuestion() {
+    if (!question) return;
+    const next =
+      definition.questions[index + 1] ?? definition.questions[index - 1];
+    store.edit((draft) => ({
+      ...draft,
+      questions: draft.questions.filter((item) => item.id !== question.id),
+    }));
+    clearPreview(question.id);
+    setSelected(next?.id ?? null);
+    setDeleting(false);
+    setValidSettings(true);
   }
   async function navigate(destination: string) {
+    if (!validSettings) {
+      setNotice("Fix the unsaved number range before leaving this form.");
+      return;
+    }
     try {
       await store.flush();
       router.push(destination);
@@ -128,9 +186,11 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
       store.adoptMetadata(await formsApi.publish(formId, revision));
       setShareOpen(true);
     } catch (error) {
-      if (error instanceof ApiError && error.error.details.length) {
+      if (error instanceof ApiError && error.status === 409)
+        store.conflict(error);
+      else if (error instanceof ApiError && error.error.details.length) {
         const first = error.error.details.find((detail) => detail.question_id);
-        if (first?.question_id) setSelected(first.question_id);
+        if (first?.question_id) select(first.question_id);
         setNotice(
           error.error.details.map((detail) => detail.message).join(" "),
         );
@@ -160,6 +220,7 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
     setReloading(true);
     try {
       store.reset(await formsApi.get(formId));
+      setValidSettings(true);
       setResolutionOpen(false);
       setConflictDismissed(false);
       if (pendingDestination) router.push(pendingDestination);
@@ -174,7 +235,6 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
       setReloading(false);
     }
   }
-
   return (
     <main className="builder-shell" id="main-content">
       <header className="builder-header">
@@ -208,8 +268,12 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
         </div>
         <nav className="builder-top-tabs" aria-label="Form sections">
           <span className="active">Content</span>
-          <button disabled>Workflow</button>
-          <button disabled>Connect</button>
+          <button disabled title="Advanced branching — coming soon">
+            Workflow
+          </button>
+          <button disabled title="Integrations — coming soon">
+            Connect
+          </button>
           <Link
             href={`/forms/${formId}/results`}
             onClick={(event) => {
@@ -222,15 +286,17 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
         </nav>
         <div className="builder-header-actions">
           <span className={`save-status save-${editor.status}`} role="status">
-            {editor.status === "saved"
-              ? "All changes saved"
-              : editor.status === "saving"
-                ? "Saving…"
-                : editor.status === "unsaved"
-                  ? "Unsaved changes"
-                  : editor.status === "conflict"
-                    ? "Save conflict"
-                    : "Couldn’t save"}
+            {!validSettings
+              ? "Unsaved range settings"
+              : editor.status === "saved"
+                ? "All changes saved"
+                : editor.status === "saving"
+                  ? "Saving…"
+                  : editor.status === "unsaved"
+                    ? "Unsaved changes"
+                    : editor.status === "conflict"
+                      ? "Save conflict"
+                      : "Couldn’t save"}
           </span>
           {editor.status === "failed" && (
             <button
@@ -265,12 +331,13 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
             Preview
           </Link>
           <button
-            className="button button-primary"
+            className="button button-primary publish-button"
             onClick={() => {
               void publish();
             }}
             disabled={
               publishing ||
+              !validSettings ||
               editor.status === "conflict" ||
               editor.status === "failed"
             }
@@ -314,61 +381,30 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
                 : "Settings"}
           </button>
         ))}
+        <Link
+          href={`/forms/${formId}/results`}
+          onClick={(event) => {
+            event.preventDefault();
+            void navigate(`/forms/${formId}/results`);
+          }}
+        >
+          Results
+        </Link>
       </div>
       <div className={`builder-body panel-${panel}`}>
-        <aside className="question-rail" aria-label="Questions">
-          <div className="rail-header">
-            <strong>Content</strong>
-            <span>{definition.questions.length}</span>
-          </div>
-          <button
-            className="button button-secondary add-question"
-            onClick={addTextQuestion}
-            disabled={definition.questions.length >= 100}
-          >
-            <Plus size={16} />
-            Add question
-          </button>
-          <div className="question-list">
-            {definition.questions.map((item, itemIndex) => (
-              <button
-                key={item.id}
-                className={`question-list-item ${question?.id === item.id ? "active" : ""}`}
-                aria-pressed={question?.id === item.id}
-                onClick={() => {
-                  setSelected(item.id);
-                  setPanel("canvas");
-                }}
-              >
-                <GripVertical size={13} className="drag-placeholder" />
-                <TypeBadge question={item} />
-                <span className="question-list-number">{itemIndex + 1}</span>
-                <span className="question-list-title">
-                  {item.title || "Untitled question"}
-                </span>
-                {item.required && <span className="list-required">*</span>}
-              </button>
-            ))}
-            {!definition.questions.length && (
-              <p className="rail-empty">Your questions will appear here.</p>
-            )}
-          </div>
-          <div className="endings-section">
-            <div className="rail-header">
-              <strong>Ending</strong>
-            </div>
-            <div className="ending-item">
-              <span className="type-badge type-ending">
-                <Check size={15} />
-              </span>
-              <span>{definition.thank_you.title}</span>
-            </div>
-          </div>
-          <div className="rail-footnote">
-            <span className="live-dot" />
-            Changes stay in your draft until published.
-          </div>
-        </aside>
+        <QuestionRail
+          questions={definition.questions}
+          selected={question?.id}
+          thankYouTitle={definition.thank_you.title}
+          onSelect={select}
+          onAdd={() => setPicker("add")}
+          onReorder={(questions) =>
+            store.edit((draft) => ({ ...draft, questions }))
+          }
+          onDuplicate={duplicateQuestion}
+          onDelete={() => setDeleting(true)}
+          onEnding={() => setFormSettings("ending")}
+        />
         <section
           className="builder-canvas-region"
           aria-label="Question preview"
@@ -394,7 +430,10 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
                 </button>
               </div>
               <span className="toolbar-divider" />
-              <button className="button button-quiet" disabled>
+              <button
+                className="button button-quiet"
+                onClick={() => setFormSettings("design")}
+              >
                 <Palette size={16} />
                 Design
               </button>
@@ -476,7 +515,7 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
                   <p>Keep it simple. Make it human.</p>
                   <button
                     className="button button-primary empty-builder-action"
-                    onClick={addTextQuestion}
+                    onClick={() => setPicker("add")}
                   >
                     <Plus size={16} />
                     Add your first question
@@ -502,83 +541,148 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
             </Link>
           </div>
         </section>
-        <aside className="question-settings" aria-label="Question settings">
-          <div className="settings-heading">
-            <Settings2 size={17} />
-            <strong>Question settings</strong>
-          </div>
-          {question ? (
-            <>
-              <div className="settings-section">
-                <div className="field-label">Question type</div>
-                <div className="type-selector">
-                  <TypeBadge question={question} />
-                  <span>{questionTypes[question.type].label}</span>
-                  <ChevronDown size={15} />
-                </div>
-              </div>
-              <div className="settings-section">
-                <div className="setting-row">
-                  <label htmlFor="required-toggle">Required</label>
-                  <Switch.Root
-                    id="required-toggle"
-                    className="switch"
-                    checked={question.required}
-                    onCheckedChange={(required) => updateQuestion({ required })}
-                  >
-                    <Switch.Thumb className="switch-thumb" />
-                  </Switch.Root>
-                </div>
-                <p className="settings-help">
-                  An answer is needed to continue.
-                </p>
-              </div>
-              {(question.type === "multiple_choice" ||
-                question.type === "dropdown") && (
-                <div className="settings-section">
-                  <div className="field-label">
-                    Choices
-                    <span className="muted">{question.options.length}</span>
-                  </div>
-                  <div className="settings-options">
-                    {question.options.map((option, optionIndex) => (
-                      <div className="settings-option" key={option.id}>
-                        <span>{String.fromCharCode(65 + optionIndex)}</span>
-                        <span>{option.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {question.type === "rating" && (
-                <div className="settings-section">
-                  <div className="field-label">Rating scale</div>
-                  <div className="text-field">
-                    1 to {question.settings.scale}
-                  </div>
-                </div>
-              )}
-              <div className="settings-section">
-                <div className="field-label">Description</div>
-                <p className="settings-description">
-                  {question.description || "No description added."}
-                </p>
-              </div>
-            </>
-          ) : (
-            <p className="settings-empty">
-              Select a question to see its settings.
-            </p>
-          )}
-          <div className="settings-tip">
-            <strong>A little guidance goes a long way.</strong>
-            <p>
-              Use a description to add context and help people give their best
-              answer.
-            </p>
-          </div>
-        </aside>
+        <QuestionSettings
+          question={question}
+          onChange={replaceQuestion}
+          onType={() => setPicker("change")}
+          onValidity={setValidSettings}
+        />
       </div>
+      <QuestionPicker
+        open={picker !== null}
+        onOpenChange={(open) => {
+          if (!open) setPicker(null);
+        }}
+        onSelect={chooseType}
+        changing={picker === "change"}
+      />
+      <Modal
+        open={typeChange !== null}
+        onOpenChange={(open) => {
+          if (!open) setTypeChange(null);
+        }}
+        title="Change how people answer?"
+        description="The current draft choices or answer settings will be discarded. Your question text and historical responses will be preserved."
+      >
+        <div className="dialog-actions">
+          <button
+            className="button button-secondary"
+            onClick={() => setTypeChange(null)}
+          >
+            Keep current type
+          </button>
+          <button
+            className="button button-primary"
+            onClick={() => {
+              if (question && typeChange) {
+                replaceQuestion(makeQuestion(typeChange, question));
+                clearPreview(question.id);
+              }
+              setTypeChange(null);
+              setValidSettings(true);
+            }}
+          >
+            Change type
+          </button>
+        </div>
+      </Modal>
+      <Modal
+        open={deleting}
+        onOpenChange={setDeleting}
+        title="Delete this question?"
+        description="This removes the question from your draft. Historical responses and the current publication remain available."
+      >
+        <div className="dialog-actions">
+          <button
+            className="button button-secondary"
+            onClick={() => setDeleting(false)}
+          >
+            Keep question
+          </button>
+          <button className="button button-danger" onClick={deleteQuestion}>
+            Delete question
+          </button>
+        </div>
+      </Modal>
+      <Modal
+        open={formSettings !== null}
+        onOpenChange={(open) => {
+          if (!open) setFormSettings(null);
+        }}
+        title={
+          formSettings === "design"
+            ? "Your form’s look and feel"
+            : "A thoughtful ending"
+        }
+        description={
+          formSettings === "design"
+            ? "A calm, spacious canvas with one consistent accent."
+            : "The message people see after their response is confirmed."
+        }
+      >
+        {formSettings === "design" ? (
+          <div className="theme-settings">
+            <div className="theme-swatch" />
+            <strong>Neutral</strong>
+            <p>Inter typography · warm white · dark navy</p>
+            <p className="settings-help">Additional themes are coming soon.</p>
+            <button
+              className="button button-secondary"
+              onClick={() => setFormSettings("ending")}
+            >
+              Edit thank-you message
+            </button>
+          </div>
+        ) : (
+          <>
+            <label className="field-label" htmlFor="ending-title">
+              Thank-you title
+            </label>
+            <input
+              id="ending-title"
+              className="text-field"
+              maxLength={200}
+              value={definition.thank_you.title}
+              onChange={(event) =>
+                store.edit((draft) => ({
+                  ...draft,
+                  thank_you: { ...draft.thank_you, title: event.target.value },
+                }))
+              }
+            />
+            <label
+              className="field-label ending-description-label"
+              htmlFor="ending-description"
+            >
+              Thank-you description
+            </label>
+            <textarea
+              id="ending-description"
+              className="text-field"
+              maxLength={2000}
+              rows={3}
+              value={definition.thank_you.description}
+              onChange={(event) =>
+                store.edit((draft) => ({
+                  ...draft,
+                  thank_you: {
+                    ...draft.thank_you,
+                    description: event.target.value,
+                  },
+                }))
+              }
+            />
+          </>
+        )}
+        <div className="dialog-actions">
+          <button
+            className="button button-primary"
+            onClick={() => setFormSettings(null)}
+          >
+            Done
+          </button>
+        </div>
+      </Modal>
       <Modal
         open={
           resolutionOpen || (editor.status === "conflict" && !conflictDismissed)

@@ -26,10 +26,10 @@ Commit messages must not contain AI attribution. Author and committer use reposi
 
 ## Phase 3 — builder and management
 
-- [ ] CRUD, all types/settings, options, drag/keyboard reorder, serialized autosave.
-- [ ] Failure/conflict preservation; export-before-discard; explicit confirmation; publication blocking.
-- [ ] Live/full-screen preview; share and stable public link.
-- [ ] Show and inspect workspace, builder, picker, settings, and preview browser screenshots.
+- [x] CRUD, all types/settings, options, drag/keyboard reorder, serialized autosave.
+- [x] Failure/conflict preservation; export-before-discard; explicit confirmation; publication blocking.
+- [x] Live/full-screen preview; share and stable public link.
+- [x] Show and inspect workspace, builder, picker, settings, and preview browser screenshots.
 
 ## Phase 4 — public experience
 

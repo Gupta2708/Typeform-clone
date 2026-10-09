@@ -3,7 +3,7 @@
 An original full-stack Typeform-style builder using Next.js, TypeScript, FastAPI, and SQLite.
 The implementation follows the preserved `CLAUDE.md` and `TYPEFORM_BUILD_PROMPT.md`.
 
-**Current milestone: Phase 2 — persistent publishing and submissions.** The complete
+**Current milestone: Phase 3 — polished builder and management.** The complete
 assignment is not finished. No hosted demo exists; the assignment's final submission requires
 both a real public repository containing the source and a working hosted demo.
 
@@ -12,11 +12,12 @@ both a real public repository containing the source and a working hosted demo.
 | Capability | Status |
 | --- | --- |
 | Real API-backed workspace, search/layout toggle, create dialog, draft creation | Implemented |
-| Responsive builder, inline title/description edits, required toggle, serialized autosave | Implemented; full question management in Phase 3 |
+| Responsive builder, inline edits, eight-type picker, settings, reorder, serialized autosave | Implemented |
 | Shared preview/public widgets, validation, navigation, reduced-motion transitions | Implemented; accessibility/keyboard refinement in Phase 4 |
 | SQLite models, initial migration, same-form ownership constraints, UTC timestamps | Implemented |
 | Immutable publication, anonymous atomic/idempotent submissions, paginated historical results | Implemented |
-| Complete management CRUD and version-scoped summaries | Pending Phases 3 and 5 |
+| Create, rename, duplicate, delete, publish, unpublish, sharing | Implemented |
+| Version-scoped summaries | Pending Phase 5 |
 | Final published demo forms and stored submissions | Pending Phase 5 |
 | Advanced logic/integrations/collaboration/payments/uploads | Outside core scope |
 | Optional theme selector/CSV/other bonuses | Deferred until all core requirements pass |
@@ -96,6 +97,8 @@ Currently available routes:
 | GET | `/api/v1/forms/{id}` | Draft definition, revision, publication metadata |
 | PUT | `/api/v1/forms/{id}/draft` | Atomic ordered draft replacement with revision guard |
 | PATCH | `/api/v1/forms/{id}` | Rename with shared revision guard |
+| POST | `/api/v1/forms/{id}/duplicate` | New draft, new keys and slug, no responses |
+| DELETE | `/api/v1/forms/{id}` | Cascade-delete owned data after UI confirmation |
 | POST | `/api/v1/forms/{id}/publish` | Validate and publish immutable snapshot |
 | POST | `/api/v1/forms/{id}/unpublish` | Close public collection |
 | GET | `/api/v1/public/forms/{slug}` | Anonymous published definition |

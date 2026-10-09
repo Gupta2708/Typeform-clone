@@ -61,6 +61,21 @@ export const formsApi = {
       method: "POST",
       body: JSON.stringify({ title }),
     }),
+  rename: (id: string, title: string, expected_revision: number) =>
+    request<FormDetail>(`/forms/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ title, expected_revision }),
+    }),
+  duplicate: (id: string) =>
+    request<FormDetail>(`/forms/${encodeURIComponent(id)}/duplicate`, {
+      method: "POST",
+    }),
+  delete: (id: string) =>
+    request<void>(`/forms/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  unpublish: (id: string) =>
+    request<FormDetail>(`/forms/${encodeURIComponent(id)}/unpublish`, {
+      method: "POST",
+    }),
   save: (id: string, draft: DraftWrite) =>
     request<FormDetail>(`/forms/${encodeURIComponent(id)}/draft`, {
       method: "PUT",

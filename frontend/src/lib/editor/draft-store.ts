@@ -162,6 +162,10 @@ export class DraftStore {
     this.notify({ metadata: fresh });
     this.onSaved(fresh);
   };
+  conflict = (error: ApiError) => {
+    this.clearTimer();
+    this.notify({ status: "conflict", error, dirty: true });
+  };
   dispose = () => {
     this.clearTimer();
   };

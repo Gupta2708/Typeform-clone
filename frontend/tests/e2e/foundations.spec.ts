@@ -118,9 +118,11 @@ test("desktop visual foundations and preview isolation", async ({
   await page.getByRole("button", { name: "Previous question" }).click();
   await expect(page.getByRole("textbox")).toHaveValue("Ada");
   for (let i = 0; i < 5; i++) {
-    if (i === 1) await page.getByRole("button", { name: "The thoughtful design" }).click();
+    if (i === 1)
+      await page.getByRole("button", { name: "The thoughtful design" }).click();
     if (i === 3) await page.getByRole("button", { name: "5 out of 5" }).click();
-    if (i === 4) await page.getByRole("button", { name: "No", exact: true }).click();
+    if (i === 4)
+      await page.getByRole("button", { name: "No", exact: true }).click();
     await page.getByRole("button", { name: "OK", exact: true }).click();
     await expect(page.locator(".player-progress")).toContainText(
       `Question ${i + 2} of 6`,

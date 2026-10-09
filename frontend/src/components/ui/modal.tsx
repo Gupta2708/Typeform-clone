@@ -2,7 +2,7 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { useId } from "react";
+import { useId, useRef } from "react";
 
 export function Modal({
   open,
@@ -20,6 +20,7 @@ export function Modal({
   trigger?: React.ReactNode;
 }) {
   const descriptionId = useId();
+  const previousFocus = useRef<HTMLElement | null>(null);
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       {trigger && <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>}
@@ -28,6 +29,26 @@ export function Modal({
         <Dialog.Content
           className="dialog-content"
           aria-describedby={description ? descriptionId : undefined}
+          onOpenAutoFocus={(event) => {
+            previousFocus.current =
+              document.activeElement as HTMLElement | null;
+            const input = (
+              event.currentTarget as HTMLElement
+            ).querySelector<HTMLElement>("input:not([readonly]), textarea");
+            if (input) {
+              event.preventDefault();
+              input.focus();
+            }
+          }}
+          onCloseAutoFocus={(event) => {
+            const target = previousFocus.current;
+            if (!target?.isConnected) return;
+            event.preventDefault();
+            const details = target.closest("details");
+            if (details && !details.open)
+              details.querySelector("summary")?.focus();
+            else target.focus();
+          }}
         >
           <Dialog.Title className="dialog-title">{title}</Dialog.Title>
           {description && (

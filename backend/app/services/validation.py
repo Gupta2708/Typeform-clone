@@ -22,6 +22,8 @@ def validate_publication(definition: FormDefinition) -> None:
         errors.append({"field": "title", "message": "Give your form a name."})
     if not definition.questions:
         errors.append({"field": "questions", "message": "Add at least one question."})
+    if not definition.thank_you.title.strip():
+        errors.append({"field": "thank_you.title", "message": "Add a thank-you title."})
     for question in definition.questions:
         if not question.title.strip():
             errors.append({"question_id": str(question.id), "message": "Add a question title."})

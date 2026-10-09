@@ -16,6 +16,7 @@ test("inline editing publishes the latest revision and an anonymous answer appea
     .getByRole("button", { name: "Create form" })
     .click();
   await page.getByRole("button", { name: "Add your first question" }).click();
+  await page.getByRole("button", { name: /^Short text/ }).click();
   await page
     .getByRole("textbox", { name: "Question title", exact: true })
     .fill("What should we call you?");

@@ -1,4 +1,7 @@
 @import "tailwindcss";
+.sortable-question.drop-target {
+  border-top: 2px solid var(--focus);
+}
 
 :root {
   --background: #f7f7f5;
@@ -1932,6 +1935,301 @@ textarea {
 }
 .question-body > h1:has(.inline-question-title) .required-mark {
   flex-shrink: 0;
+}
+.form-card-container {
+  position: relative;
+  min-width: 0;
+}
+.form-card-container > .form-card {
+  height: 100%;
+}
+.form-actions {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  z-index: 2;
+}
+.form-actions summary {
+  display: flex;
+  padding: 7px;
+  border-radius: 5px;
+  background: var(--surface);
+  cursor: pointer;
+  list-style: none;
+}
+.form-actions summary::-webkit-details-marker {
+  display: none;
+}
+.form-action-menu {
+  position: absolute;
+  top: 38px;
+  right: 0;
+  min-width: 185px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-dialog);
+}
+.form-action-menu button,
+.form-action-menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 12px;
+  text-align: left;
+}
+.form-action-menu button:hover,
+.form-action-menu a:hover {
+  background: var(--surface-subtle);
+}
+.destructive-text {
+  color: var(--error);
+}
+.question-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 20px;
+}
+.picker-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+}
+.picker-search input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font-size: 13px;
+}
+.picker-search:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.picker-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: left;
+}
+.picker-option:hover {
+  background: var(--background);
+  border-color: var(--border-strong);
+}
+.picker-option strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+}
+.picker-option small {
+  display: block;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-top: 5px;
+}
+.picker-empty {
+  padding: 20px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.sortable-question {
+  display: flex;
+  align-items: stretch;
+  margin: 0 10px 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+}
+.sortable-question.active {
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+.sortable-question.dragging {
+  background: var(--surface);
+  box-shadow: var(--shadow-dialog);
+  z-index: 5;
+}
+.sortable-question.dragging {
+  opacity: 0.25;
+  border: 2px dashed var(--focus);
+}
+.question-drag-overlay {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 10px;
+  background: var(--surface);
+  border: 1px solid var(--focus);
+  box-shadow: var(--shadow-dialog);
+  border-radius: var(--radius);
+  font-size: 12px;
+}
+.inline-title-editor {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  min-width: 0;
+}
+.inline-title-mirror {
+  visibility: hidden;
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.inline-title-editor .inline-question-title {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+.sortable-question .question-list-item {
+  padding-left: 0;
+  margin: 0;
+  border: 0;
+  width: 100%;
+  background: transparent;
+}
+.question-drag-handle {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: grab;
+  touch-action: none;
+}
+.question-rail-actions {
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+  padding: 8px 16px;
+}
+.question-rail-actions .icon-button {
+  min-width: 34px;
+}
+.settings-option input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  outline: 0;
+  font-size: 11px;
+}
+.settings-option:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.settings-option .icon-button {
+  flex-shrink: 0;
+  width: 23px;
+  min-width: 23px;
+  min-height: 24px;
+  padding: 0;
+}
+.settings-add-choice {
+  margin-top: 10px;
+  padding-left: 0;
+  font-size: 11px;
+}
+.number-bounds {
+  display: flex;
+  gap: 10px;
+}
+.number-bounds label {
+  min-width: 0;
+  flex: 1;
+}
+.number-bounds label > span {
+  display: block;
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.number-bounds input {
+  padding: 10px;
+}
+.settings-description-input {
+  resize: vertical;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.type-selector {
+  width: 100%;
+  background: var(--surface);
+  text-align: left;
+}
+.ending-item {
+  background: transparent;
+  text-align: left;
+  width: 100%;
+}
+.theme-settings {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+}
+.theme-settings > p {
+  color: var(--text-secondary);
+}
+.theme-swatch {
+  height: 70px;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, var(--surface) 70%, var(--accent) 70%);
+}
+.ending-description-label {
+  margin-top: 20px;
+}
+@media (max-width: 767px) {
+  .builder-header {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 100px;
+    padding: 10px 16px;
+    gap: 8px;
+  }
+  .builder-breadcrumb {
+    flex-basis: 100%;
+  }
+  .builder-header-actions {
+    flex-basis: 100%;
+    justify-content: flex-end;
+  }
+  .builder-header-actions > button {
+    display: inline-flex;
+  }
+  .builder-header-actions .save-status {
+    display: inline;
+    margin-right: auto;
+  }
+  .builder-mobile-tabs > a {
+    padding: 12px;
+    font-size: 12px;
+  }
+}
+@media (max-width: 480px) {
+  .question-picker-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-action-menu {
+    min-width: 175px;
+  }
 }
 .inline-description {
   margin-top: 18px;

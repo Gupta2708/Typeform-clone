@@ -19,52 +19,56 @@ import type { FormCard } from "@/lib/contracts";
 import { Brand } from "@/components/ui/brand";
 import { Modal } from "@/components/ui/modal";
 import { ErrorState, LoadingState } from "@/components/ui/query-state";
+import { FormActions } from "@/components/workspace/form-actions";
 
 function FormTile({ form }: { form: FormCard }) {
   return (
-    <Link
-      href={`/forms/${form.id}/builder`}
-      className="form-card"
-      aria-label={`Open ${form.title}`}
-    >
-      <div className="form-thumbnail">
-        <span className="thumbnail-eyebrow">
-          A little curiosity goes a long way.
-        </span>
-        <h3>{form.title}</h3>
-        <div className="thumbnail-answer" />
-        <span className="thumbnail-button">
-          Let’s begin <ArrowRight size={11} />
-        </span>
-      </div>
-      <div className="form-card-details">
-        <div className="form-card-title">
-          {form.title}
-          <ChevronRight size={17} />
-        </div>
-        <div className="form-card-meta">
-          <span className={`status-chip ${form.status}`}>
-            <span />
-            {form.status === "published" ? "Published" : "Draft"}
+    <div className="form-card-container">
+      <Link
+        href={`/forms/${form.id}/builder`}
+        className="form-card"
+        aria-label={`Open ${form.title}`}
+      >
+        <div className="form-thumbnail">
+          <span className="thumbnail-eyebrow">
+            A little curiosity goes a long way.
           </span>
-          <span>
-            {form.response_count}{" "}
-            {form.response_count === 1 ? "response" : "responses"}
+          <h3>{form.title}</h3>
+          <div className="thumbnail-answer" />
+          <span className="thumbnail-button">
+            Let’s begin <ArrowRight size={11} />
           </span>
         </div>
-        <div className="form-card-date">
-          Edited{" "}
-          {new Intl.DateTimeFormat("en", {
-            day: "numeric",
-            month: "short",
-          }).format(new Date(form.updated_at))}
-          <span>
-            {form.question_count}{" "}
-            {form.question_count === 1 ? "question" : "questions"}
-          </span>
+        <div className="form-card-details">
+          <div className="form-card-title">
+            {form.title}
+            <ChevronRight size={17} />
+          </div>
+          <div className="form-card-meta">
+            <span className={`status-chip ${form.status}`}>
+              <span />
+              {form.status === "published" ? "Published" : "Draft"}
+            </span>
+            <span>
+              {form.response_count}{" "}
+              {form.response_count === 1 ? "response" : "responses"}
+            </span>
+          </div>
+          <div className="form-card-date">
+            Edited{" "}
+            {new Intl.DateTimeFormat("en", {
+              day: "numeric",
+              month: "short",
+            }).format(new Date(form.updated_at))}
+            <span>
+              {form.question_count}{" "}
+              {form.question_count === 1 ? "question" : "questions"}
+            </span>
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+      <FormActions form={form} />
+    </div>
   );
 }
 

@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.database import get_session
@@ -14,7 +14,7 @@ from app.schemas.forms import (
     RevisionRequest,
 )
 from app.schemas.responses import ResponseDetail, ResponseList
-from app.services import drafts, forms, publication, responses
+from app.services import drafts, forms, management, publication, responses
 
 router = APIRouter(prefix="/api/v1/forms", tags=["Creator forms"])
 DatabaseSession = Annotated[Session, Depends(get_session)]
@@ -50,6 +50,17 @@ def rename_form(form_id: UUID, payload: RenameRequest, session: DatabaseSession)
 @router.post("/{form_id}/publish", response_model=FormDetail)
 def publish_form(form_id: UUID, payload: RevisionRequest, session: DatabaseSession):
     return publication.publish(session, str(form_id), payload.expected_revision)
+
+
+@router.post("/{form_id}/duplicate", response_model=FormDetail, status_code=201)
+def duplicate_form(form_id: UUID, session: DatabaseSession):
+    return management.duplicate_form(session, str(form_id))
+
+
+@router.delete("/{form_id}", status_code=204)
+def delete_form(form_id: UUID, session: DatabaseSession):
+    management.delete_form(session, str(form_id))
+    return Response(status_code=204)
 
 
 @router.post("/{form_id}/unpublish", response_model=FormDetail)
