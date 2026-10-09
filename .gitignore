@@ -1,0 +1,33 @@
+# Dependencies, virtual environments, and local caches
+node_modules/
+.venv/
+.cache/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Build and browser-test artifacts
+.next/
+.next-e2e/
+out/
+dist/
+coverage/
+playwright-report/
+test-results/
+next-env.d.ts
+*.tsbuildinfo
+
+# Local configuration and persistent development data
+.env
+.env.*
+!.env.example
+*.db
+*.db-*
+*.sqlite*
+backend/data/*
+!backend/data/.gitkeep
+*.log
+.DS_Store
+Thumbs.db
