@@ -3,7 +3,7 @@
 An original full-stack Typeform-style builder using Next.js, TypeScript, FastAPI, and SQLite.
 The implementation follows the preserved `CLAUDE.md` and `TYPEFORM_BUILD_PROMPT.md`.
 
-**Current milestone: Phase 1 — application, persistence, and visual foundations.** The complete
+**Current milestone: Phase 2 — persistent publishing and submissions.** The complete
 assignment is not finished. No hosted demo exists; the assignment's final submission requires
 both a real public repository containing the source and a working hosted demo.
 
@@ -12,15 +12,16 @@ both a real public repository containing the source and a working hosted demo.
 | Capability | Status |
 | --- | --- |
 | Real API-backed workspace, search/layout toggle, create dialog, draft creation | Implemented |
-| Responsive builder layout, stable selection, loaded settings, interactive answer preview | Foundation implemented; persistent editing comes next |
-| Shared preview widgets for all eight types, navigation, reduced-motion transitions | Foundation implemented; full validation/keyboard behavior comes later |
+| Responsive builder, inline title/description edits, required toggle, serialized autosave | Implemented; full question management in Phase 3 |
+| Shared preview/public widgets, validation, navigation, reduced-motion transitions | Implemented; accessibility/keyboard refinement in Phase 4 |
 | SQLite models, initial migration, same-form ownership constraints, UTC timestamps | Implemented |
-| Publication, autosave, public submissions, management CRUD, results | Pending Phases 2–5 |
+| Immutable publication, anonymous atomic/idempotent submissions, paginated historical results | Implemented |
+| Complete management CRUD and version-scoped summaries | Pending Phases 3 and 5 |
 | Final published demo forms and stored submissions | Pending Phase 5 |
 | Advanced logic/integrations/collaboration/payments/uploads | Outside core scope |
 | Optional theme selector/CSV/other bonuses | Deferred until all core requirements pass |
 
-Disabled editing/publication controls in the foundation do not simulate successful operations.
+Advanced workflow/integration controls remain disabled and do not simulate successful operations.
 The foundation fixtures are real stored drafts and have zero responses. Preview completion does
 not submit anything. This is a shared default-creator workspace, not private account auth.
 
@@ -93,6 +94,14 @@ Currently available routes:
 | GET | `/api/v1/forms?limit=100&offset=0` | Paginated creator forms and stored counts |
 | POST | `/api/v1/forms` | Create an empty persisted draft |
 | GET | `/api/v1/forms/{id}` | Draft definition, revision, publication metadata |
+| PUT | `/api/v1/forms/{id}/draft` | Atomic ordered draft replacement with revision guard |
+| PATCH | `/api/v1/forms/{id}` | Rename with shared revision guard |
+| POST | `/api/v1/forms/{id}/publish` | Validate and publish immutable snapshot |
+| POST | `/api/v1/forms/{id}/unpublish` | Close public collection |
+| GET | `/api/v1/public/forms/{slug}` | Anonymous published definition |
+| POST | `/api/v1/public/forms/{slug}/responses` | Atomic, validated, idempotent submission |
+| GET | `/api/v1/forms/{id}/responses` | Paginated immutable historical answers |
+| GET | `/api/v1/forms/{id}/responses/{response_id}` | Historical response detail |
 
 Create request: `{"title":"Customer feedback"}`. Error envelope:
 
@@ -125,7 +134,8 @@ npm run test:e2e
 
 Playwright starts isolated services on ports 3001/8001 using `.cache/e2e.db`, never the normal
 development database. Test reports/traces are ignored by Git. Browser captures are written to
-`docs/screenshots/phase-1/`. Exact observed results are recorded in `docs/phase-1-report.md`
+`.cache/screenshots/current/`, preserving checkpoint captures under `docs/screenshots/phase-1/`.
+Exact observed results are recorded in `docs/phase-1-report.md` and `docs/phase-2-report.md`
 when the milestone is verified; later phases extend the acceptance suite.
 
 ## Deployment and submission boundary
@@ -136,5 +146,6 @@ on a durable mounted volume, explicit migrations, health checks, and environment
 Ephemeral/serverless SQLite storage does not meet the persistence requirement.
 
 Local Git is connected to https://github.com/Gupta2708/Typeform-clone.git. No commit or push is
-performed without the user's approval. An empty remote alone is not a completed public-source
+performed without the user's authorization. Phase commits are authorized; pushing is pending.
+An empty remote alone is not a completed public-source
 submission, and local preview URLs are not hosted demo links.

@@ -20,9 +20,9 @@ Commit messages must not contain AI attribution. Author and committer use reposi
 
 ## Phase 2 — vertical slice
 
-- [ ] Create → edit → save → publish → anonymous submit → stored results.
-- [ ] Restart backend and verify persisted data.
-- [ ] Revisions, draft/public isolation, atomic/idempotent submissions.
+- [x] Create → edit → save → publish → anonymous submit → stored results.
+- [x] Restart backend and verify persisted data.
+- [x] Revisions, draft/public isolation, atomic/idempotent submissions.
 
 ## Phase 3 — builder and management
 

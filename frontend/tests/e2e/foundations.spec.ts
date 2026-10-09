@@ -4,7 +4,7 @@ import path from "node:path";
 
 const screenshots = path.resolve(
   __dirname,
-  "../../../docs/screenshots/phase-1",
+  "../../../.cache/screenshots/current",
 );
 
 test("workspace loads persisted drafts, filters, switches layout, and creates a real draft", async ({
@@ -37,9 +37,9 @@ test("workspace loads persisted drafts, filters, switches layout, and creates a 
     .getByRole("button", { name: "Create form" })
     .click();
   await expect(page).toHaveURL(/\/forms\/[^/]+\/builder$/);
-  await expect(page.locator(".builder-title")).toHaveText(title);
+  await expect(page.locator(".builder-title")).toHaveValue(title);
   await page.reload();
-  await expect(page.locator(".builder-title")).toHaveText(title);
+  await expect(page.locator(".builder-title")).toHaveValue(title);
   expect(errors).toEqual([]);
 });
 
@@ -82,12 +82,12 @@ test("desktop visual foundations and preview isolation", async ({
     .getByRole("link", { name: "Open Customer feedback", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: /First things first/ }),
-  ).toBeVisible();
+    page.getByRole("textbox", { name: "Question title", exact: true }),
+  ).toHaveValue(/First things first/);
   await page.getByRole("button", { name: /What did you enjoy most/ }).click();
   await expect(
-    page.getByRole("heading", { name: /^What did you enjoy most/ }),
-  ).toBeVisible();
+    page.getByRole("textbox", { name: "Question title", exact: true }),
+  ).toHaveValue(/^What did you enjoy most/);
   await expect(page.locator(".question-settings")).toBeVisible();
   await page.screenshot({
     path: path.join(screenshots, "builder-desktop.png"),
@@ -118,6 +118,9 @@ test("desktop visual foundations and preview isolation", async ({
   await page.getByRole("button", { name: "Previous question" }).click();
   await expect(page.getByRole("textbox")).toHaveValue("Ada");
   for (let i = 0; i < 5; i++) {
+    if (i === 1) await page.getByRole("button", { name: "The thoughtful design" }).click();
+    if (i === 3) await page.getByRole("button", { name: "5 out of 5" }).click();
+    if (i === 4) await page.getByRole("button", { name: "No", exact: true }).click();
     await page.getByRole("button", { name: "OK", exact: true }).click();
     await expect(page.locator(".player-progress")).toContainText(
       `Question ${i + 2} of 6`,
@@ -156,8 +159,8 @@ test("mobile and intermediate layouts preserve access without horizontal overflo
       .getByRole("link", { name: "Open Customer feedback", exact: true })
       .click();
     await expect(
-      page.getByRole("heading", { name: /First things first/ }),
-    ).toBeVisible();
+      page.getByRole("textbox", { name: "Question title", exact: true }),
+    ).toHaveValue(/First things first/);
     if (width <= 900) {
       await page
         .getByRole("button", { name: "Questions", exact: true })

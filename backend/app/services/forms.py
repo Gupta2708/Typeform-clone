@@ -1,22 +1,24 @@
 from secrets import token_urlsafe
 
 from sqlalchemy import func, select
+from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.orm import Session, selectinload
 
 from app.errors import AppError
 from app.models import Creator, Form, FormVersion, Question, Submission
 from app.schemas.forms import CreateForm, FormCard, FormDetail, FormList
+from app.services.transactions import begin_write
 
 DEFAULT_CREATOR_ID = "00000000-0000-4000-8000-000000000001"
 
 
 def ensure_creator(session: Session) -> Creator:
-    creator = session.get(Creator, DEFAULT_CREATOR_ID)
-    if creator is None:
-        creator = Creator(id=DEFAULT_CREATOR_ID, display_name="Gupta")
-        session.add(creator)
-        session.flush()
-    return creator
+    session.execute(
+        insert(Creator)
+        .values(id=DEFAULT_CREATOR_ID, display_name="Gupta")
+        .on_conflict_do_nothing(index_elements=["id"])
+    )
+    return session.get(Creator, DEFAULT_CREATOR_ID)
 
 
 def form_card(session: Session, form: Form) -> FormCard:
@@ -99,6 +101,7 @@ def list_forms(session: Session, limit: int, offset: int) -> FormList:
 
 
 def create_form(session: Session, payload: CreateForm) -> FormDetail:
+    begin_write(session)
     ensure_creator(session)
     form = Form(creator_id=DEFAULT_CREATOR_ID, title=payload.title, slug=token_urlsafe(12))
     session.add(form)

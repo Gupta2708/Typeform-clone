@@ -140,11 +140,15 @@ export function QuestionContent({
   number,
   value,
   onChange,
+  titleEditor,
+  descriptionEditor,
 }: {
   question: Question;
   number: number;
   value?: AnswerValue;
   onChange: (value: AnswerValue) => void;
+  titleEditor?: React.ReactNode;
+  descriptionEditor?: React.ReactNode;
 }) {
   return (
     <div className="question-content">
@@ -154,16 +158,17 @@ export function QuestionContent({
       </span>
       <div className="question-body">
         <h1 id={`question-${question.id}`}>
-          {question.title || "Your question goes here"}
+          {titleEditor ?? (question.title || "Your question goes here")}
           {question.required && (
             <span className="required-mark" aria-label="required">
               *
             </span>
           )}
         </h1>
-        {question.description && (
-          <p className="question-description">{question.description}</p>
-        )}
+        {descriptionEditor ??
+          (question.description && (
+            <p className="question-description">{question.description}</p>
+          ))}
         <div className="answer-area">
           <QuestionWidget
             question={question}

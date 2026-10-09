@@ -8,16 +8,18 @@ logger = logging.getLogger(__name__)
 
 
 class AppError(Exception):
-    def __init__(self, status: int, code: str, message: str):
+    def __init__(self, status: int, code: str, message: str, details: list[dict] | None = None):
         self.status = status
         self.code = code
         self.message = message
+        self.details = details or []
 
 
 async def app_error_handler(_request: Request, exc: AppError) -> JSONResponse:
     return JSONResponse(
         status_code=exc.status,
-        content={"error": {"code": exc.code, "message": exc.message, "details": []}},
+        content={"error": {"code": exc.code, "message": exc.message, "details": exc.details}},
+        headers={"Cache-Control": "no-store"},
     )
 
 

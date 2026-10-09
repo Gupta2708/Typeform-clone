@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api.forms import router as forms_router
+from app.api.public import router as public_router
 from app.config import get_settings
 from app.database import get_session
 from app.errors import (
@@ -29,6 +30,7 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 app.include_router(forms_router)
+app.include_router(public_router)
 
 
 @app.get("/health", tags=["Operations"])

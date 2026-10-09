@@ -94,3 +94,22 @@ export type ErrorDetail = {
 export type ErrorEnvelope = {
   error: { code: string; message: string; details: ErrorDetail[] };
 };
+
+export type HistoricalAnswer = {
+  question_id: string;
+  title: string;
+  type: QuestionType;
+  required: boolean;
+  value: AnswerValue | null;
+  display_value: string | null;
+};
+export type ResponseDetail = SubmissionReceipt & {
+  version_number: number;
+  answers: HistoricalAnswer[];
+};
+export type ResponseList = {
+  items: ResponseDetail[];
+  total: number;
+  limit: number;
+  offset: number;
+};

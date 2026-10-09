@@ -1,4 +1,13 @@
-import type { ErrorEnvelope, FormDetail, FormList } from "@/lib/contracts";
+import type {
+  DraftWrite,
+  ErrorEnvelope,
+  FormDetail,
+  FormList,
+  PublicForm,
+  ResponseList,
+  SubmissionReceipt,
+  SubmissionRequest,
+} from "@/lib/contracts";
 
 export class ApiError extends Error {
   constructor(
@@ -52,4 +61,28 @@ export const formsApi = {
       method: "POST",
       body: JSON.stringify({ title }),
     }),
+  save: (id: string, draft: DraftWrite) =>
+    request<FormDetail>(`/forms/${encodeURIComponent(id)}/draft`, {
+      method: "PUT",
+      body: JSON.stringify(draft),
+    }),
+  publish: (id: string, expected_revision: number) =>
+    request<FormDetail>(`/forms/${encodeURIComponent(id)}/publish`, {
+      method: "POST",
+      body: JSON.stringify({ expected_revision }),
+    }),
+  responses: (id: string, offset = 0) =>
+    request<ResponseList>(
+      `/forms/${encodeURIComponent(id)}/responses?limit=25&offset=${offset}`,
+    ),
+};
+
+export const publicApi = {
+  get: (slug: string) =>
+    request<PublicForm>(`/public/forms/${encodeURIComponent(slug)}`),
+  submit: (slug: string, payload: SubmissionRequest) =>
+    request<SubmissionReceipt>(
+      `/public/forms/${encodeURIComponent(slug)}/responses`,
+      { method: "POST", body: JSON.stringify(payload) },
+    ),
 };
