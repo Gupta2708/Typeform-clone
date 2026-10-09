@@ -32,3 +32,7 @@ backend/data/*
 *.log
 .DS_Store
 Thumbs.db
+
+# Local build instructions excluded from the source repository
+/CLAUDE.md
+/TYPEFORM_BUILD_PROMPT.md

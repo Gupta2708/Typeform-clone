@@ -1,7 +1,7 @@
 # Durable deployment and submission guide
 
-Hosted deployment is outside this build. The public repository is verified at Phase 5
-(`e6144f4`); the final Phase 6 commit still needs an authorized push. No hosted demo is verified.
+Hosted deployment is outside this build. A follow-up read-only remote check confirmed all six
+implementation phases on public `main` through `b516a81`. No hosted demo is verified.
 Compose configuration validates; Docker's daemon was unavailable locally, so container builds
 and execution remain unverified. Complete the smoke checklist after deploying.
 
@@ -120,8 +120,8 @@ not evidence of a hosted restore drill.
 
 ## Hosted smoke checklist
 
-- [x] Public repository contains Phase 1–5 source, both instruction files and lockfiles.
-- [ ] Final Phase 6 source and handoff are pushed to the public repository.
+- [x] Public repository contains all six implementation phases and dependency lockfiles.
+- [x] Phase 6 source and handoff are present on remote main at `b516a81`.
 - [ ] HTTPS workspace and bundled fonts/static assets load.
 - [ ] Health passes, migrations are at head and SQLite is on the durable mount.
 - [ ] Seed has two published forms, one draft and twenty valid stored responses.

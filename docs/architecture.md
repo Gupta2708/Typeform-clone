@@ -2,7 +2,7 @@
 
 ## Request path and module boundaries
 
-Next.js App Router has thin workspace, builder, preview, results, and public routes. Client
+Next.js App Router has thin homepage, workspace, builder, preview, results, and public routes. Client
 components use `frontend/src/lib/api/client.ts` for same-origin `/api/v1` requests. Next.js
 forwards these to FastAPI with the server-only `API_BASE_URL`, baked into the production
 rewrite at build time. Changing its target requires rebuilding. Requests use no-store.
@@ -14,7 +14,10 @@ SQLAlchemy models and Alembic migrations own storage. LocalStorage is not a data
 TanStack Query owns server state and pagination. `useDraftEditor` connects React to a
 serialized draft store. A player reducer owns answers, active question, direction and submit
 state. Radix handles dialogs/focus, dnd-kit handles ordering, Motion handles transitions and
-Lucide supplies icons. Inter is bundled with its OFL license and needs no external font service.
+Lucide supplies icons. Inter and the homepage's DM Serif Display are bundled with their OFL licenses
+and need no external font service. Homepage styling is scoped; its local builder/results demos never
+write to the API, and its interactive player uses explicit preview mode. Example links resolve
+stored forms rather than inventing public destinations.
 
 ## Database schema
 

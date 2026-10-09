@@ -1,8 +1,9 @@
 # Phase checkpoints
 
-The user initially requested separate approval for every commit, then authorized phase commits
-with “do commits.” Announce each phase's verified changes and proposed commit before creating
-it; continue through the six phases. Pushing still requires explicit authorization.
+The six implementation phase commits were completed under the user's “do commits” authorization.
+The user has since renewed the requirement for explicit approval before every future commit.
+Report changes, observed checks, remaining issues and the exact proposed message, then wait
+for approval before committing. Pushing requires separate explicit authorization.
 Commit messages must not contain AI attribution. Author and committer use repository-local
 `Gupta2708 <guptavaibhav2708@gmail.com>` settings.
 
@@ -51,3 +52,7 @@ Commit messages must not contain AI attribution. Author and committer use reposi
 - [x] Verify existing public Phase 1–5 source; state final push and hosted demo requirements.
 
 Optional bonuses are deferred until every core requirement passes.
+
+After completion, the user requested removal of the two supplied instruction files from the
+current source tree and addition of their root paths to `.gitignore`. The original phase checks
+above describe the preserved files at those checkpoints; earlier commits retain them.

@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowDown, ArrowUp, Check, RotateCcw } from "lucide-react";
-import { useReducer, useRef } from "react";
+import { useReducer, useRef, useState } from "react";
 import type { Answers, AnswerValue, FormDefinition } from "@/lib/contracts";
 import { ApiError } from "@/lib/api/client";
 import { normalizeAll, normalizeAnswer } from "@/lib/validation/answers";
@@ -59,16 +59,18 @@ function reducer(state: PlayerState, action: Action): PlayerState {
   }
 }
 
-type Props =
+type Props = { autoFocus?: boolean } & (
   | { definition: FormDefinition; mode?: "preview"; onSubmit?: never }
   | {
       definition: FormDefinition;
       mode: "public";
       onSubmit: (answers: Answers) => Promise<unknown>;
-    };
+    }
+);
 export function FormPlayer(props: Props) {
   const { definition } = props;
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [activated, setActivated] = useState(false);
   const reducedMotion = useReducedMotion();
   const transitionGate = useRef(false);
   const submissionGate = useRef(false);
@@ -290,6 +292,7 @@ export function FormPlayer(props: Props) {
   return (
     <div
       className="form-player"
+      onFocusCapture={() => setActivated(true)}
       ref={root}
       onKeyDown={handleKey}
       aria-busy={state.status === "submitting"}
@@ -318,7 +321,7 @@ export function FormPlayer(props: Props) {
               disabled={state.status === "submitting"}
             >
               <QuestionContent
-                focusOnMount
+                focusOnMount={props.autoFocus !== false || activated}
                 error={state.error}
                 question={question}
                 number={state.index + 1}

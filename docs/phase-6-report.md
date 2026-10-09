@@ -69,13 +69,21 @@ choices are documented. This is an original implementation, not an exact proprie
 
 ## Remaining issues and submission status
 
+Follow-up verification confirmed remote `main` at `b516a81`, containing all six implementation
+phase commits. The repository's public visibility was verified during the Phase 6 checkpoint;
+the table above records that checkpoint's earlier remote revision. The local API reports ready,
+the production workspace returns 200, and the two published demo forms retain ten responses each.
+
+After these checks, the user requested removal of the supplied instruction files from the
+current source tree and exclusion through `.gitignore`. Their earlier committed versions remain
+in the six-phase history; the preservation check above records their state at verification.
+
 - Docker's daemon is not running locally. Configuration validates, but images/containers,
   Linux runtime and the Caddy HTTPS flow have not been executed.
 - Hosted deployment is outside scope and no hosted demo is verified. Follow
   [deployment.md](deployment.md), including durable-volume restart and off-volume restore checks.
-- The public repository exists with Phase 1–5 source. The final Phase 6 commit must be pushed
-  with separate authorization. Assignment submission still needs the current public source
-  and a real working hosted demo URL.
+- Public source now contains all six build phases. Assignment submission still requires a real
+  working hosted demo URL. Future commits and pushes require separate explicit authorization.
 - Full npm audit reports the [braces stack-exhaustion advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm),
   propagated through micromatch/fast-glob/Next's ESLint tooling. The latest available braces
   version was 3.0.3 and no patch was listed when checked. Runtime audit is clean. A forced
