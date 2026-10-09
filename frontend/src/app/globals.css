@@ -1,4 +1,75 @@
 @import "tailwindcss";
+.clear-answer {
+  display: block;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  padding: 10px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.searchable-dropdown {
+  position: relative;
+  width: 100%;
+}
+.dropdown-input-row {
+  display: flex;
+  align-items: center;
+}
+.dropdown-input-row .answer-input {
+  flex: 1;
+  padding-right: 38px;
+}
+.dropdown-toggle {
+  position: absolute;
+  right: 0;
+  background: transparent;
+  color: var(--accent);
+  min-height: 44px;
+}
+.dropdown-listbox {
+  max-height: 260px;
+  overflow-y: auto;
+  margin-top: 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 6px;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 8%);
+}
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  min-height: 44px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 18px;
+}
+.dropdown-option.highlighted {
+  background: var(--accent-soft);
+}
+.dropdown-no-results {
+  padding: 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+.question-body > .player-error {
+  margin-left: 0;
+}
+.question-body h1:focus,
+.player-empty h1:focus {
+  outline: 0;
+}
+.player-footer {
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  flex-shrink: 0;
+}
+.rating-group {
+  flex-wrap: wrap;
+}
 .sortable-question.drop-target {
   border-top: 2px solid var(--focus);
 }

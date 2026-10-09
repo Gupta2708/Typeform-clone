@@ -270,7 +270,9 @@ test("Phase 3 visual checkpoint: workspace, builder, picker, settings and previe
   await page.emulateMedia({ reducedMotion: "reduce" });
   const directory = path.resolve(
     __dirname,
-    "../../../docs/screenshots/phase-3",
+    process.env.CAPTURE_PHASE3 === "1"
+      ? "../../../docs/screenshots/phase-3"
+      : "../../../.cache/screenshots/current",
   );
   await fs.mkdir(directory, { recursive: true });
   for (const width of [1440, 1280, 768, 390]) {

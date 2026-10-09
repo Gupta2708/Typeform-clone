@@ -33,9 +33,9 @@ Commit messages must not contain AI attribution. Author and committer use reposi
 
 ## Phase 4 — public experience
 
-- [ ] All types, compatible validation, keyboard/mobile flow, Back, progress, transitions.
-- [ ] Reduced motion, focus, no double advance/submit, retry without lost answers.
-- [ ] Thank-you only after server success; closed/unavailable states.
+- [x] All types, compatible validation, keyboard/mobile flow, Back, progress, transitions.
+- [x] Reduced motion, focus, no double advance/submit, retry without lost answers.
+- [x] Thank-you only after server success; closed/unavailable states.
 
 ## Phase 5 — results and seeds
 

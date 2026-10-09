@@ -81,7 +81,7 @@ export function FormPlayer(props: Props) {
     queueMicrotask(() =>
       root.current
         ?.querySelector<HTMLElement>(
-          ".answer-input, select, .choice-row, .rating-option",
+          ".answer-input, [role=radio][tabindex='0']",
         )
         ?.focus(),
     );
@@ -133,7 +133,7 @@ export function FormPlayer(props: Props) {
       let message =
         "Your response couldn’t be sent. Your answers are still here. Please retry.";
       if (error instanceof ApiError) {
-        message = error.message;
+        message = `${error.message} Your answers are still here. Please retry.`;
         const failing = definition.questions.findIndex((item) =>
           error.error.details.some((detail) => detail.question_id === item.id),
         );
@@ -159,7 +159,7 @@ export function FormPlayer(props: Props) {
       "input, textarea, select, [contenteditable=true], [role=combobox]",
     );
     if (event.key === "Enter") {
-      if (target.matches("select, [role=combobox]")) return;
+      if (target.matches("select, [role=combobox][aria-expanded=true]")) return;
       if (
         question.type === "long_text" &&
         target.matches("textarea") &&
@@ -175,7 +175,7 @@ export function FormPlayer(props: Props) {
       if (
         target.closest("button") &&
         !target.closest(
-          ".choice-row[aria-pressed=true], .rating-option[aria-pressed=true]",
+          ".choice-row[aria-checked=true], .rating-option[aria-checked=true]",
         )
       )
         return;
@@ -242,7 +242,14 @@ export function FormPlayer(props: Props) {
         <span className="completion-symbol">
           <Check size={28} />
         </span>
-        <h1>{definition.thank_you.title}</h1>
+        <h1
+          tabIndex={-1}
+          ref={(node) => {
+            node?.focus({ preventScroll: true });
+          }}
+        >
+          {definition.thank_you.title}
+        </h1>
         <p>
           {props.mode === "public"
             ? definition.thank_you.description
@@ -311,6 +318,8 @@ export function FormPlayer(props: Props) {
               disabled={state.status === "submitting"}
             >
               <QuestionContent
+                focusOnMount
+                error={state.error}
                 question={question}
                 number={state.index + 1}
                 value={state.answers[question.id]}
@@ -318,11 +327,6 @@ export function FormPlayer(props: Props) {
                   dispatch({ type: "answer", id: question.id, value })
                 }
               />
-              {state.error && (
-                <p className="player-error" role="alert">
-                  {state.error}
-                </p>
-              )}
               <div className="player-action">
                 <button
                   type="button"
@@ -336,7 +340,9 @@ export function FormPlayer(props: Props) {
                     ? "Sending…"
                     : state.index === definition.questions.length - 1
                       ? props.mode === "public"
-                        ? "Submit"
+                        ? state.status === "error"
+                          ? "Retry submission"
+                          : "Submit"
                         : "Finish preview"
                       : "OK"}
                   <Check size={18} />

@@ -3,7 +3,7 @@
 An original full-stack Typeform-style builder using Next.js, TypeScript, FastAPI, and SQLite.
 The implementation follows the preserved `CLAUDE.md` and `TYPEFORM_BUILD_PROMPT.md`.
 
-**Current milestone: Phase 3 — polished builder and management.** The complete
+**Current milestone: Phase 4 — polished public respondent experience.** The complete
 assignment is not finished. No hosted demo exists; the assignment's final submission requires
 both a real public repository containing the source and a working hosted demo.
 
@@ -13,7 +13,7 @@ both a real public repository containing the source and a working hosted demo.
 | --- | --- |
 | Real API-backed workspace, search/layout toggle, create dialog, draft creation | Implemented |
 | Responsive builder, inline edits, eight-type picker, settings, reorder, serialized autosave | Implemented |
-| Shared preview/public widgets, validation, navigation, reduced-motion transitions | Implemented; accessibility/keyboard refinement in Phase 4 |
+| Shared renderer registry, searchable dropdown, keyboard/mobile flow, validation, retry | Implemented |
 | SQLite models, initial migration, same-form ownership constraints, UTC timestamps | Implemented |
 | Immutable publication, anonymous atomic/idempotent submissions, paginated historical results | Implemented |
 | Create, rename, duplicate, delete, publish, unpublish, sharing | Implemented |
