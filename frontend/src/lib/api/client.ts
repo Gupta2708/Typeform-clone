@@ -7,6 +7,7 @@ import type {
   ResponseList,
   SubmissionReceipt,
   SubmissionRequest,
+  SummaryResponse,
 } from "@/lib/contracts";
 
 export class ApiError extends Error {
@@ -54,6 +55,10 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const formsApi = {
+  summary: (id: string, versionId?: string | null) =>
+    request<SummaryResponse>(
+      `/forms/${encodeURIComponent(id)}/summary${versionId ? `?form_version_id=${encodeURIComponent(versionId)}` : ""}`,
+    ),
   list: () => request<FormList>("/forms"),
   get: (id: string) => request<FormDetail>(`/forms/${encodeURIComponent(id)}`),
   create: (title: string) =>

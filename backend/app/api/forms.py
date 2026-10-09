@@ -14,7 +14,8 @@ from app.schemas.forms import (
     RevisionRequest,
 )
 from app.schemas.responses import ResponseDetail, ResponseList
-from app.services import drafts, forms, management, publication, responses
+from app.schemas.summary import SummaryResponse
+from app.services import drafts, forms, management, publication, responses, summary
 
 router = APIRouter(prefix="/api/v1/forms", tags=["Creator forms"])
 DatabaseSession = Annotated[Session, Depends(get_session)]
@@ -76,6 +77,13 @@ def list_responses(
     offset: int = Query(0, ge=0),
 ):
     return responses.list_responses(session, str(form_id), limit, offset)
+
+
+@router.get("/{form_id}/summary", response_model=SummaryResponse)
+def get_summary(form_id: UUID, session: DatabaseSession, form_version_id: UUID | None = None):
+    return summary.form_summary(
+        session, str(form_id), str(form_version_id) if form_version_id else None
+    )
 
 
 @router.get("/{form_id}/responses/{response_id}", response_model=ResponseDetail)

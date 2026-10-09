@@ -1,4 +1,4 @@
-"""Explicit, non-destructive draft fixtures for the Phase 1 browser review."""
+"""Explicit, non-destructive foundation or final demo fixtures."""
 
 import argparse
 from uuid import NAMESPACE_URL, uuid5
@@ -166,13 +166,27 @@ def seed_foundation(session: Session) -> int:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
         "--foundation",
         action="store_true",
-        required=True,
         help="Create three draft fixtures; no published forms or responses.",
     )
-    parser.parse_args()
-    with SessionLocal.begin() as db:
-        count = seed_foundation(db)
-    print(f"Created {count} foundation drafts. Existing data was preserved.")
+    group.add_argument(
+        "--demo",
+        action="store_true",
+        help="Two published forms with ten responses each, and one draft.",
+    )
+    args = parser.parse_args()
+    with SessionLocal() as db:
+        if args.foundation:
+            count = seed_foundation(db)
+            db.commit()
+        else:
+            from scripts.seed_demo import seed_demo
+
+            count = seed_demo(db)
+    print(
+        f"Created {count} {'foundation drafts' if args.foundation else 'demo forms'}. "
+        "Existing data was preserved."
+    )

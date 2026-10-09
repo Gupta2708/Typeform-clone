@@ -113,3 +113,26 @@ export type ResponseList = {
   limit: number;
   offset: number;
 };
+
+export type QuestionSummary = {
+  question_id: string;
+  title: string;
+  type: QuestionType;
+  required: boolean;
+  answered_count: number;
+  skipped_count: number;
+  distribution: {
+    value: string | number | boolean;
+    label: string;
+    count: number;
+    percentage: number | null;
+  }[];
+  statistics: { min: number; max: number; mean: number } | null;
+  text_samples: string[];
+};
+export type SummaryResponse = {
+  form_version_id: string | null;
+  version_number: number | null;
+  total_responses: number;
+  questions: QuestionSummary[];
+};

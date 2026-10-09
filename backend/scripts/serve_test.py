@@ -10,6 +10,7 @@ from alembic import command
 from app.config import get_settings
 from app.database import SessionLocal
 from scripts.seed import seed_foundation
+from scripts.seed_demo import seed_demo
 
 if __name__ == "__main__":
     if not os.environ.get("DATABASE_URL") or "e2e" not in get_settings().database_url:
@@ -17,6 +18,8 @@ if __name__ == "__main__":
     command.upgrade(Config("alembic.ini"), "head")
     with SessionLocal.begin() as session:
         seed_foundation(session)
+    with SessionLocal() as session:
+        seed_demo(session)
     subprocess.run(
         [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8001"],
         check=True,

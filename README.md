@@ -3,7 +3,7 @@
 An original full-stack Typeform-style builder using Next.js, TypeScript, FastAPI, and SQLite.
 The implementation follows the preserved `CLAUDE.md` and `TYPEFORM_BUILD_PROMPT.md`.
 
-**Current milestone: Phase 4 — polished public respondent experience.** The complete
+**Current milestone: Phase 5 — versioned results and demo data.** The complete
 assignment is not finished. No hosted demo exists; the assignment's final submission requires
 both a real public repository containing the source and a working hosted demo.
 
@@ -17,8 +17,8 @@ both a real public repository containing the source and a working hosted demo.
 | SQLite models, initial migration, same-form ownership constraints, UTC timestamps | Implemented |
 | Immutable publication, anonymous atomic/idempotent submissions, paginated historical results | Implemented |
 | Create, rename, duplicate, delete, publish, unpublish, sharing | Implemented |
-| Version-scoped summaries | Pending Phase 5 |
-| Final published demo forms and stored submissions | Pending Phase 5 |
+| Version-scoped summaries, immutable response detail, pagination | Implemented |
+| Two published demo forms with ten responses each and one draft | Implemented |
 | Advanced logic/integrations/collaboration/payments/uploads | Outside core scope |
 | Optional theme selector/CSV/other bonuses | Deferred until all core requirements pass |
 
@@ -42,13 +42,16 @@ cd backend
 Copy-Item .env.example .env
 uv sync --locked --cache-dir ../.cache/uv
 .\.venv\Scripts\python.exe -m alembic upgrade head
-.\.venv\Scripts\python.exe -m scripts.seed --foundation
+.\.venv\Scripts\python.exe -m scripts.seed --demo
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-The seed is explicit and idempotent: three draft forms for visual review, no published forms,
-no responses, no destructive reset. Rerunning it preserves existing fixture edits and user
-forms. The application does not seed or migrate automatically on startup.
+The final demo seed is explicit and idempotent: Customer experience and Community event are
+published with ten validated responses each; Product discovery is a draft. They demonstrate all
+eight types, valid false/0 values, and optional skips. Public routes are `/to/demo-experience`
+and `/to/demo-event`. Rerunning preserves existing fixture edits, publication state and user
+forms. `--foundation` remains available for the three original visual drafts. The application
+does not seed or migrate automatically on startup.
 
 Frontend, in another terminal:
 
@@ -105,6 +108,7 @@ Currently available routes:
 | POST | `/api/v1/public/forms/{slug}/responses` | Atomic, validated, idempotent submission |
 | GET | `/api/v1/forms/{id}/responses` | Paginated immutable historical answers |
 | GET | `/api/v1/forms/{id}/responses/{response_id}` | Historical response detail |
+| GET | `/api/v1/forms/{id}/summary?form_version_id={uuid}` | Version-scoped counts/statistics |
 
 Create request: `{"title":"Customer feedback"}`. Error envelope:
 

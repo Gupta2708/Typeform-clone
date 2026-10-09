@@ -39,9 +39,9 @@ Commit messages must not contain AI attribution. Author and committer use reposi
 
 ## Phase 5 — results and seeds
 
-- [ ] Historical table/detail, version-scoped summaries, real counts and proper denominators.
-- [ ] Two published mixed-type forms, one draft, ten submissions per published form.
-- [ ] Idempotent seeding preserves user records and demonstrates skipped optional answers.
+- [x] Historical table/detail, version-scoped summaries, real counts and proper denominators.
+- [x] Two published mixed-type forms, one draft, ten submissions per published form.
+- [x] Idempotent seeding preserves user records and demonstrates skipped optional answers.
 
 ## Phase 6 — verification and handoff
 
