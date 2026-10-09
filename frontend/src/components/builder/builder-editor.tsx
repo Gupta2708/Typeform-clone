@@ -47,6 +47,9 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
   const [publishing, setPublishing] = useState(false);
   const [notice, setNotice] = useState("");
   const [validSettings, setValidSettings] = useState(true);
+  const [comingSoon, setComingSoon] = useState<"workflow" | "connect" | null>(
+    null,
+  );
   const [shareOpen, setShareOpen] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
   const [conflictDismissed, setConflictDismissed] = useState(false);
@@ -237,6 +240,31 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
   }
   return (
     <main className="builder-shell" id="main-content">
+      <Modal
+        open={comingSoon !== null}
+        onOpenChange={(open) => {
+          if (!open) setComingSoon(null);
+        }}
+        title={
+          comingSoon === "workflow"
+            ? "More paths, coming soon"
+            : "More connections, coming soon"
+        }
+        description={
+          comingSoon === "workflow"
+            ? "Advanced branching and logic are planned. Your form currently follows the question order you set."
+            : "Integrations and webhooks are planned. Responses are available in the Results tab."
+        }
+      >
+        <div className="dialog-actions">
+          <button
+            className="button button-primary"
+            onClick={() => setComingSoon(null)}
+          >
+            Got it
+          </button>
+        </div>
+      </Modal>
       <header className="builder-header">
         <div className="builder-breadcrumb">
           <Hint label="Back to workspace">
@@ -268,12 +296,8 @@ export function BuilderEditor({ initial }: { initial: FormDetail }) {
         </div>
         <nav className="builder-top-tabs" aria-label="Form sections">
           <span className="active">Content</span>
-          <button disabled title="Advanced branching — coming soon">
-            Workflow
-          </button>
-          <button disabled title="Integrations — coming soon">
-            Connect
-          </button>
+          <button onClick={() => setComingSoon("workflow")}>Workflow</button>
+          <button onClick={() => setComingSoon("connect")}>Connect</button>
           <Link
             href={`/forms/${formId}/results`}
             onClick={(event) => {

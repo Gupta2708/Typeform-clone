@@ -5,6 +5,24 @@ from sqlalchemy import func, select
 from app.models import Answer, FormVersion, Question, Submission
 
 
+def test_workspace_pagination_searches_beyond_first_page_and_escapes_wildcards(client):
+    for index in range(103):
+        title = "Hidden older form 50%_complete" if index == 0 else f"Form {index}"
+        assert client.post("/api/v1/forms", json={"title": title}).status_code == 201
+    first = client.get("/api/v1/forms?limit=100").json()
+    second = client.get("/api/v1/forms?limit=100&offset=100").json()
+    assert first["total"] == second["total"] == 103
+    assert len(first["items"]) == 100 and len(second["items"]) == 3
+    assert not {item["id"] for item in first["items"]}.intersection(
+        item["id"] for item in second["items"]
+    )
+    result = client.get("/api/v1/forms", params={"search": "  HIDDEN OLDER  "}).json()
+    assert result["total"] == 1 and result["items"][0]["title"].endswith("50%_complete")
+    assert client.get("/api/v1/forms", params={"search": "%_"}).json()["total"] == 1
+    assert client.get("/api/v1/forms", params={"search": "missing"}).json()["total"] == 0
+    assert client.get("/api/v1/forms", params={"search": "x" * 201}).status_code == 422
+
+
 def test_duplicate_renames_keys_and_delete_cascades_only_owned_records(client, session):
     form = client.post("/api/v1/forms", json={"title": "Original"}).json()
     qid, oid = str(uuid4()), str(uuid4())

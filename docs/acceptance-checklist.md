@@ -45,9 +45,9 @@ Commit messages must not contain AI attribution. Author and committer use reposi
 
 ## Phase 6 — verification and handoff
 
-- [ ] Refine an already polished interface; 200% zoom, long content, 30-question scrolling.
-- [ ] Full backend and critical browser tests; typecheck/lint/build.
-- [ ] Complete README, architecture, exact commands, deployment topology, limitations.
-- [ ] Clearly state that public repository/demo submission requirements remain outstanding.
+- [x] Refine an already polished interface; actual 200% zoom, long content, 30-question scrolling.
+- [x] Full backend (32) and browser tests (19); typecheck/lint/production build.
+- [x] Complete README, architecture, exact commands, deployment topology, backup/restore and limitations.
+- [x] Verify existing public Phase 1–5 source; state final push and hosted demo requirements.
 
 Optional bonuses are deferred until every core requirement passes.

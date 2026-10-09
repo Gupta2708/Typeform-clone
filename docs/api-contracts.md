@@ -8,8 +8,10 @@ prefix but expose separate definitions and behavior.
 
 - `GET /health`: 200 `{ "status": "ok", "database": "ready" }`; 503 if the schema/database
   is unavailable. Startup never silently creates tables.
-- `GET /api/v1/forms`: `limit` 1–100 (default 100), `offset` >=0; returns
+- `GET /api/v1/forms`: `limit` 1–100 (default 100), `offset` >=0, optional `search` <=200
+  characters (trimmed case-insensitive substring; `%` and `_` are literal); returns
   `{items: FormCard[], total, limit, offset}` ordered by most recently edited, then ID.
+  SQLite's built-in lowercase matching folds ASCII case; full Unicode case folding is not supplied.
 - `POST /api/v1/forms`: `{title?: string}`; default `Untitled form`. Nonblank trimmed title,
   maximum 200 characters. Returns 201 `FormDetail`.
 - `GET /api/v1/forms/{id}`: UUID; returns 200 `FormDetail`, 404 for an unknown form,
@@ -20,7 +22,7 @@ derived `response_count`, `question_count`, UTC `created_at`/`updated_at`.
 
 `FormDetail`: card fields plus `theme`, `thank_you`, ordered `questions`, nullable
 `published_version_id`, and `versions[]` metadata (`id`, `version_number`,
-`source_draft_revision`, `published_at`). Creator metadata is never part of the planned
+`source_draft_revision`, `published_at`). Creator metadata is never part of the
 public response.
 
 ## Shared definition

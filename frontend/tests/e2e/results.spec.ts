@@ -16,7 +16,9 @@ test("demo results show ten real responses, immutable detail, and meaningful sum
   await expect(page.getByRole("row")).toHaveCount(11);
   const directory = path.resolve(
     __dirname,
-    "../../../docs/screenshots/phase-5",
+    process.env.CAPTURE_PHASE5 === "1"
+      ? "../../../docs/screenshots/phase-5"
+      : "../../../.cache/screenshots/current/results",
   );
   await fs.mkdir(directory, { recursive: true });
   await page.screenshot({
@@ -46,11 +48,9 @@ test("demo results show ten real responses, immutable detail, and meaningful sum
   await expect(email.locator(".summary-denominator")).toHaveText(
     "6 answered · 4 skipped · 10 total",
   );
-  const rating = page
-    .locator(".summary-question")
-    .filter({
-      has: page.getByRole("heading", { name: /How was your experience/ }),
-    });
+  const rating = page.locator(".summary-question").filter({
+    has: page.getByRole("heading", { name: /How was your experience/ }),
+  });
   await expect(rating.locator(".numeric-stats")).toContainText(
     "Average rating3",
   );

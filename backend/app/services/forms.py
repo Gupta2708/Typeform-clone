@@ -89,8 +89,12 @@ def get_form(session: Session, form_id: str) -> Form:
     return form
 
 
-def list_forms(session: Session, limit: int, offset: int) -> FormList:
+def list_forms(session: Session, limit: int, offset: int, search: str = "") -> FormList:
     statement = select(Form).where(Form.creator_id == DEFAULT_CREATOR_ID)
+    if search.strip():
+        statement = statement.where(
+            func.lower(Form.title).contains(search.strip().lower(), autoescape=True)
+        )
     total = session.scalar(select(func.count()).select_from(statement.subquery())) or 0
     forms = session.scalars(
         statement.order_by(Form.updated_at.desc(), Form.id).limit(limit).offset(offset)

@@ -59,7 +59,10 @@ export const formsApi = {
     request<SummaryResponse>(
       `/forms/${encodeURIComponent(id)}/summary${versionId ? `?form_version_id=${encodeURIComponent(versionId)}` : ""}`,
     ),
-  list: () => request<FormList>("/forms"),
+  list: (offset = 0, search = "", limit = 100) =>
+    request<FormList>(
+      `/forms?offset=${offset}&limit=${limit}&search=${encodeURIComponent(search)}`,
+    ),
   get: (id: string) => request<FormDetail>(`/forms/${encodeURIComponent(id)}`),
   create: (title: string) =>
     request<FormDetail>("/forms", {

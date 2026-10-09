@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   ArrowRight,
   ChevronDown,
@@ -75,8 +80,21 @@ function FormTile({ form }: { form: FormCard }) {
 export function Workspace() {
   const router = useRouter();
   const client = useQueryClient();
-  const forms = useQuery({ queryKey: ["forms"], queryFn: formsApi.list });
   const [search, setSearch] = useState("");
+  const forms = useInfiniteQuery({
+    queryKey: ["forms", "pages", search.trim()],
+    queryFn: ({ pageParam }) => formsApi.list(pageParam, search.trim()),
+    initialPageParam: 0,
+    getNextPageParam: (last) =>
+      last.offset + last.items.length < last.total
+        ? last.offset + last.items.length
+        : undefined,
+  });
+  const count = useQuery({
+    queryKey: ["forms", "count"],
+    queryFn: () => formsApi.list(0, "", 1),
+  });
+  const total = count.data?.total;
   const [layout, setLayout] = useState<"grid" | "list">("grid");
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -88,10 +106,7 @@ export function Workspace() {
       router.push(`/forms/${form.id}/builder`);
     },
   });
-  const filtered =
-    forms.data?.items.filter((form) =>
-      form.title.toLowerCase().includes(search.trim().toLowerCase()),
-    ) ?? [];
+  const filtered = forms.data?.pages.flatMap((page) => page.items) ?? [];
   const createTrigger = (
     <button className="button button-primary">
       <Plus size={17} />
@@ -130,7 +145,7 @@ export function Workspace() {
         <Link href="/workspace" className="workspace-link">
           <span className="workspace-dot" />
           My workspace
-          <span className="sidebar-count">{forms.data?.total ?? "—"}</span>
+          <span className="sidebar-count">{total ?? "—"}</span>
         </Link>
         <div className="sidebar-bottom">
           <div className="sidebar-note">
@@ -227,7 +242,8 @@ export function Workspace() {
           </div>
           <div className="workspace-toolbar">
             <div className="forms-label">
-              All forms <span>{forms.data?.total ?? "—"}</span>
+              {search.trim() ? "Matching forms" : "All forms"}{" "}
+              <span>{forms.data?.pages[0]?.total ?? "—"}</span>
               <ChevronDown size={14} />
             </div>
             <div className="workspace-tools">
@@ -238,6 +254,7 @@ export function Workspace() {
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Search forms"
                   aria-label="Search forms"
+                  maxLength={200}
                 />
               </label>
               <div className="view-toggle" aria-label="Form layout">
@@ -299,6 +316,19 @@ export function Workspace() {
                   Create your first form
                 </button>
               )}
+            </div>
+          )}
+          {forms.hasNextPage && (
+            <div className="workspace-load-more">
+              <button
+                className="button button-secondary"
+                disabled={forms.isFetching}
+                onClick={() => {
+                  void forms.fetchNextPage();
+                }}
+              >
+                {forms.isFetchingNextPage ? "Loading…" : "Load more forms"}
+              </button>
             </div>
           )}
           <div className="workspace-footer">

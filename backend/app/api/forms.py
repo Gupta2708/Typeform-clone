@@ -23,9 +23,12 @@ DatabaseSession = Annotated[Session, Depends(get_session)]
 
 @router.get("", response_model=FormList)
 def list_forms(
-    session: DatabaseSession, limit: int = Query(100, ge=1, le=100), offset: int = Query(0, ge=0)
+    session: DatabaseSession,
+    limit: int = Query(100, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    search: str = Query("", max_length=200),
 ):
-    return forms.list_forms(session, limit, offset)
+    return forms.list_forms(session, limit, offset, search)
 
 
 @router.post("", response_model=FormDetail, status_code=201)

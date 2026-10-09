@@ -1,4 +1,15 @@
 @import "tailwindcss";
+.workspace-load-more {
+  display: flex;
+  justify-content: center;
+  margin: 32px 0;
+}
+.form-card-container:nth-child(3n + 2) .form-thumbnail {
+  background: #f0e9e5;
+}
+.form-card-container:nth-child(3n + 3) .form-thumbnail {
+  background: #eceaf2;
+}
 .results-tabs > button {
   background: transparent;
   padding: 16px 0;
@@ -240,8 +251,8 @@
   --surface: #ffffff;
   --surface-subtle: #f0f0ed;
   --text: #262625;
-  --text-secondary: #6f6f6b;
-  --text-muted: #90908a;
+  --text-secondary: #656560;
+  --text-muted: #70706a;
   --border: #e7e7e3;
   --border-strong: #d3d3cd;
   --accent: #243e4a;
@@ -2440,7 +2451,9 @@ textarea {
     flex-basis: 100%;
   }
   .builder-header-actions {
-    flex-basis: 100%;
+    flex: 1 1 100%;
+    min-width: 0;
+    flex-wrap: wrap;
     justify-content: flex-end;
   }
   .builder-header-actions > button {
@@ -2449,6 +2462,7 @@ textarea {
   .builder-header-actions .save-status {
     display: inline;
     margin-right: auto;
+    font-size: 11px;
   }
   .builder-mobile-tabs > a {
     padding: 12px;

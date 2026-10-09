@@ -83,7 +83,9 @@ test("anonymous flow validates and stores all eight types with keyboard navigati
   await page.goto(`/to/${form.slug}`);
   const screenshots = path.resolve(
     __dirname,
-    "../../../docs/screenshots/phase-4",
+    process.env.CAPTURE_PHASE4 === "1"
+      ? "../../../docs/screenshots/phase-4"
+      : "../../../.cache/screenshots/current/player",
   );
   await fs.mkdir(screenshots, { recursive: true });
   await heading(page, "short_text");
@@ -242,7 +244,9 @@ test("transitions suppress repeated Enter and mobile player remains spacious and
   await expect(page.locator(".player-question")).toHaveCount(1);
   const directory = path.resolve(
     __dirname,
-    "../../../docs/screenshots/phase-4",
+    process.env.CAPTURE_PHASE4 === "1"
+      ? "../../../docs/screenshots/phase-4"
+      : "../../../.cache/screenshots/current/player",
   );
   await fs.mkdir(directory, { recursive: true });
   await page.screenshot({

@@ -41,11 +41,33 @@ export function Results({ formId }: { formId: string }) {
             {responses.data?.total === 1 ? "conversation" : "conversations"}
           </p>
         </div>
-        <div className="results-tabs" role="tablist" aria-label="Results views">
+        <div
+          className="results-tabs"
+          role="tablist"
+          aria-label="Results views"
+          onKeyDown={(event) => {
+            if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
+              return;
+            event.preventDefault();
+            const next =
+              event.key === "Home"
+                ? "responses"
+                : event.key === "End"
+                  ? "summary"
+                  : tab === "responses"
+                    ? "summary"
+                    : "responses";
+            setTab(next);
+            event.currentTarget
+              .querySelector<HTMLButtonElement>(`#${next}-tab`)
+              ?.focus();
+          }}
+        >
           <button
             role="tab"
             id="responses-tab"
-            aria-controls="responses-panel"
+            aria-controls={tab === "responses" ? "responses-panel" : undefined}
+            tabIndex={tab === "responses" ? 0 : -1}
             aria-selected={tab === "responses"}
             className={tab === "responses" ? "active" : ""}
             onClick={() => setTab("responses")}
@@ -55,7 +77,8 @@ export function Results({ formId }: { formId: string }) {
           <button
             role="tab"
             id="summary-tab"
-            aria-controls="summary-panel"
+            aria-controls={tab === "summary" ? "summary-panel" : undefined}
+            tabIndex={tab === "summary" ? 0 : -1}
             aria-selected={tab === "summary"}
             className={tab === "summary" ? "active" : ""}
             onClick={() => setTab("summary")}
