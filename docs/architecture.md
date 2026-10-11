@@ -37,13 +37,17 @@ Reconstructing history from mutable draft rows would relabel or lose old answers
 
 Answer question keys have no foreign key to mutable draft questions. Validation checks their
 membership in the submitted snapshot. Composite foreign keys enforce that published pointers
-and submission versions belong to the same form. A SQLite trigger rejects version updates.
+and submission versions belong to the same form. Database-specific triggers reject version updates
+on both SQLite and PostgreSQL.
 Deletion clears the pointer and cascades only owned data after explicit UI confirmation.
 Duplication creates fresh keys/slug and copies only a draft. UTC timestamps are restored as
 timezone-aware values; response counts come from submissions rather than mutable counters.
 
-Connections enable foreign keys and a 15-second busy timeout. Writes use `BEGIN IMMEDIATE`
-before reading state, serializing competing SQLite writes. Multi-record changes commit or roll
+SQLite connections enable foreign keys and a 15-second busy timeout. Writes use `BEGIN IMMEDIATE`
+before reading state, serializing competing SQLite writes. PostgreSQL uses psycopg 3, a small pool
+with connection checks and `pg_advisory_xact_lock(2708, 1)` before mutable reads. This transaction
+lock serializes application writes across connections, releasing on commit/rollback. It favors
+correctness over parallel write throughput and avoids session locks. Multi-record changes commit or roll
 back together. Reordering uses temporary negative positions before assigning final positions,
 avoiding unique-constraint collisions. Migrations preserve the intentional forms/versions cycle.
 
@@ -95,8 +99,13 @@ Percentages divide by answered count; skips are separate. Empty means/percentage
 unavailable. Numeric means normalize before summing to avoid finite-value overflow.
 Workspace search is server-side and pagination exposes forms beyond the first 100.
 
-SQLite makes this assignment explainable. Deploy one backend instance with a durable volume;
-this is not a multi-instance database design. A hosted creator is a shared editable workspace,
+SQLite remains the local/default database and requires a durable volume. PostgreSQL support was
+added for the approved Vercel + Render Free + Neon deployment, where storage outlives backend
+sleep/restarts. Keep one backend instance for this demo. Existing SQLite migrations remain at the
+same revisions; their PostgreSQL branches handle the circular ownership constraint after creating
+both tables and install a PL/pgSQL immutable-version trigger. A hosted creator is a shared editable workspace,
 without private authentication. Advanced workflow/integrations and extra themes are honest
 placeholders; bonuses remain deferred. See [deployment](deployment.md) and the
-[verification report](phase-6-report.md) for observed checks and limitations.
+[verification report](phase-6-report.md) for observed core checks. See the
+[free hosting guide](free-deployment.md) and [PostgreSQL report](postgresql-report.md) for the
+new deployment path and its observed checks.

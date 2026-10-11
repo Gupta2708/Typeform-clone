@@ -229,7 +229,7 @@ def test_unknown_duplicate_question_and_foreign_version(client, published):
     assert client.post(url, json={**body, "form_version_id": str(uuid4())}).status_code == 422
 
 
-def test_version_snapshot_updates_are_rejected_by_sqlite(session, published):
+def test_version_snapshot_updates_are_rejected_by_database(session, published):
     with pytest.raises(IntegrityError):
         session.execute(
             text("UPDATE form_versions SET definition_json = '{}' WHERE id = :id"),

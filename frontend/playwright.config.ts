@@ -39,7 +39,8 @@ export default defineConfig({
       reuseExistingServer: false,
       timeout: 60_000,
       env: {
-        DATABASE_URL: "sqlite:///../.cache/e2e.db",
+        // Use a dedicated database named with "e2e" for PostgreSQL browser checks.
+        DATABASE_URL: process.env.E2E_DATABASE_URL ?? "sqlite:///../.cache/e2e.db",
         CORS_ORIGINS: '["http://127.0.0.1:3001"]',
       },
     },

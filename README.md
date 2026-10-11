@@ -13,6 +13,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-29222C?style=flat-square&logo=typescript&logoColor=3178C6)](https://www.typescriptlang.org/docs/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Python-29222C?style=flat-square&logo=fastapi&logoColor=009688)](https://fastapi.tiangolo.com/)
 [![SQLite](https://img.shields.io/badge/SQLite-persistent-29222C?style=flat-square&logo=sqlite&logoColor=74B7DB)](https://sqlite.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-29222C?style=flat-square&logo=postgresql&logoColor=74B7DB)](https://neon.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-29222C?style=flat-square&logo=tailwindcss&logoColor=38BDF8)](https://tailwindcss.com/)
 
 </div>
@@ -128,7 +129,9 @@ responses each and one draft** to a fresh database. Reruns preserve existing edi
 4. Explore **Results**. Compare individual responses with summaries from the published version.
 5. Try **Community event** for dropdown, number, yes/no and long-text questions. **Product discovery** is a draft preview.
 
-Normal startup never seeds data or creates tables. New submissions naturally increase the counts.
+Direct uvicorn startup requires migrations first. The container entrypoint migrates before serving;
+optional `SEED_DEMO=true` adds missing fixtures and preserves existing data. New submissions
+naturally increase the counts.
 
 ## Architecture
 
@@ -149,7 +152,7 @@ flowchart TB
     X --> A[FastAPI /api/v1]
     A --> C[Pydantic contracts]
     C --> S[Application services]
-    S --> D[(SQLite and SQLAlchemy)]
+    S --> D[(SQLite locally / PostgreSQL on Neon)]
     M[Alembic migrations] --> D
 ```
 
@@ -166,8 +169,10 @@ Autosave debounces for 650 ms with one request in flight. Draft and metadata wri
 `expected_revision`; stale writes return `409`. A conflict retains local edits, offers a draft
 download and blocks publication. Discarding requires explicit confirmation.
 
-SQLite foreign keys enforce version ownership. Transactions keep submissions and answers atomic.
-Use one backend instance with a persistent database volume.
+Both databases enforce version ownership and immutable snapshots. Transactions keep submissions
+and answers atomic. Local SQLite needs a persistent volume; hosted PostgreSQL keeps data outside
+the backend container. Writes serialize through SQLite's write lock or a PostgreSQL transaction
+advisory lock. See the [free hosting setup](docs/free-deployment.md).
 
 ```text
 frontend/   Routes, UI components, state, contracts and browser checks
@@ -222,6 +227,11 @@ Read the [core verification report](docs/phase-6-report.md) and
 
 ## Deploy with durable storage
 
+**Free hosted combo:** Vercel Hobby for Next.js, Render Free for FastAPI and Neon Free for
+PostgreSQL. Follow the [complete setup guide](docs/free-deployment.md); root
+[render.yaml](render.yaml) supplies the backend Blueprint. The backend can sleep while Neon
+retains forms and responses. Provider quotas and cold starts apply; a hosted demo remains unverified.
+
 For a local production frontend, keep the API running and stop the development frontend:
 
 ```powershell
@@ -249,5 +259,7 @@ unverified. Local URLs do not satisfy the assignment's hosted-demo requirement.
 | [Homepage references](docs/landing-report.md)          | Additional official image references, design choices and checks |
 | [Acceptance checkpoints](docs/acceptance-checklist.md) | Six phases and browser evidence                                 |
 | [Deployment](docs/deployment.md)                       | Durable SQLite hosting and operational checks                   |
+| [Free hosting setup](docs/free-deployment.md)          | Vercel + Render + Neon, environment setup and PostgreSQL backups |
+| [PostgreSQL verification](docs/postgresql-report.md)  | Database parity, concurrency, restarts and browser checks       |
 
 Built by [Gupta2708](https://github.com/Gupta2708).

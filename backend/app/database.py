@@ -14,8 +14,19 @@ class Base(DeclarativeBase):
 
 def make_engine(database_url: str) -> Engine:
     url = make_url(database_url)
+    # Neon provides standard PostgreSQL URLs. Select the installed psycopg 3 driver
+    # without rewriting credentials or dropping TLS/channel-binding parameters.
+    if url.drivername in {"postgres", "postgresql", "postgresql+psycopg"}:
+        url = url.set(drivername="postgresql+psycopg")
+        return create_engine(
+            url,
+            pool_pre_ping=True,
+            pool_size=2,
+            max_overflow=2,
+            connect_args={"connect_timeout": 15},
+        )
     if url.get_backend_name() != "sqlite":
-        raise ValueError("This assignment uses SQLite; DATABASE_URL must point to SQLite.")
+        raise ValueError("DATABASE_URL must use SQLite or PostgreSQL with psycopg.")
     if url.database and url.database != ":memory:":
         Path(url.database).parent.mkdir(parents=True, exist_ok=True)
     db_engine = create_engine(

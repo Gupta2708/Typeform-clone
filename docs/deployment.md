@@ -1,7 +1,10 @@
 # Durable deployment and submission guide
 
-Hosted deployment is outside this build. A follow-up read-only remote check confirmed all six
-implementation phases on public `main` through `b516a81`. No hosted demo is verified.
+For the approved free provider setup, use [Vercel + Render + Neon](free-deployment.md).
+PostgreSQL is now supported alongside local SQLite; Neon retains data outside Render's
+ephemeral service. The rest of this page documents the original durable-SQLite deployment.
+
+All six core implementation phases are available in the public repository. No hosted demo is verified.
 Compose configuration validates; Docker's daemon was unavailable locally, so container builds
 and execution remain unverified. Complete the smoke checklist after deploying.
 
@@ -121,7 +124,7 @@ not evidence of a hosted restore drill.
 ## Hosted smoke checklist
 
 - [x] Public repository contains all six implementation phases and dependency lockfiles.
-- [x] Phase 6 source and handoff are present on remote main at `b516a81`.
+- [x] Six-phase source and handoff are present in the public repository.
 - [ ] HTTPS workspace and bundled fonts/static assets load.
 - [ ] Health passes, migrations are at head and SQLite is on the durable mount.
 - [ ] Seed has two published forms, one draft and twenty valid stored responses.

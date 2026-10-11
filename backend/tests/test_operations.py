@@ -8,6 +8,8 @@ from scripts.backup_db import backup_database
 def test_backup_retains_committed_data_after_live_deletion_and_refuses_overwrite(
     client, engine, tmp_path
 ):
+    if engine.dialect.name != "sqlite":
+        pytest.skip("SQLite backup API is local-only; PostgreSQL uses pg_dump")
     form = client.post("/api/v1/forms", json={"title": "Restore verification"}).json()
     archive = backup_database(str(engine.url), tmp_path / "backup.db")
     assert client.delete(f"/api/v1/forms/{form['id']}").status_code == 204

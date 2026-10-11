@@ -1,5 +1,7 @@
 from logging.config import fileConfig
 
+from sqlalchemy.engine import make_url
+
 from alembic import context
 from app import models  # noqa: F401
 from app.config import get_settings
@@ -12,8 +14,11 @@ target_metadata = Base.metadata
 
 
 def run_migrations_offline():
+    url = make_url(get_settings().database_url)
+    if url.drivername == "postgres":
+        url = url.set(drivername="postgresql")
     context.configure(
-        url=get_settings().database_url,
+        url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -26,7 +31,9 @@ def run_migrations_online():
     engine = make_engine(get_settings().database_url)
     with engine.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata, render_as_batch=True
+            connection=connection,
+            target_metadata=target_metadata,
+            render_as_batch=connection.dialect.name == "sqlite",
         )
         with context.begin_transaction():
             context.run_migrations()

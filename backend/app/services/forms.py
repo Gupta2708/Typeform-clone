@@ -1,7 +1,8 @@
 from secrets import token_urlsafe
 
 from sqlalchemy import func, select
-from sqlalchemy.dialects.sqlite import insert
+from sqlalchemy.dialects.postgresql import insert as postgres_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import Session, selectinload
 
 from app.errors import AppError
@@ -13,6 +14,7 @@ DEFAULT_CREATOR_ID = "00000000-0000-4000-8000-000000000001"
 
 
 def ensure_creator(session: Session) -> Creator:
+    insert = postgres_insert if session.get_bind().dialect.name == "postgresql" else sqlite_insert
     session.execute(
         insert(Creator)
         .values(id=DEFAULT_CREATOR_ID, display_name="Gupta")

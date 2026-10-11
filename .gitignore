@@ -27,6 +27,7 @@ next-env.d.ts
 *.db
 *.db-*
 *.sqlite*
+*.dump
 backend/data/*
 !backend/data/.gitkeep
 *.log

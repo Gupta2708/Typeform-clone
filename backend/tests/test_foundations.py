@@ -51,6 +51,8 @@ def test_request_limit_is_enforced_before_a_write(client):
 
 
 def test_foreign_keys_are_enabled_on_each_connection(engine):
+    if engine.dialect.name != "sqlite":
+        pytest.skip("PRAGMA is SQLite-specific; ownership constraints are tested on both databases")
     with engine.connect() as first, engine.connect() as second:
         assert first.scalar(text("PRAGMA foreign_keys")) == 1
         assert second.scalar(text("PRAGMA foreign_keys")) == 1

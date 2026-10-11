@@ -1,0 +1,21 @@
+# Import this repository as a Render Blueprint. DATABASE_URL is entered privately
+# in the dashboard; use a Neon PostgreSQL connection string with TLS enabled.
+services:
+  - type: web
+    name: typeform-api
+    runtime: docker
+    plan: free
+    branch: main
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: "[]"
+      - key: MAX_REQUEST_BYTES
+        value: "1048576"
+      - key: SEED_DEMO
+        value: "true"

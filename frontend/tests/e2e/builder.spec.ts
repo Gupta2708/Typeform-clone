@@ -101,13 +101,21 @@ test("all eight types, settings, type warning, duplicate, keyboard and pointer r
     .getByRole("button", { name: "Delete question", exact: true })
     .click();
   await expect(page.locator(".sortable-question")).toHaveCount(8);
+  await expect(page.getByRole("dialog")).toBeHidden();
   const handle = page.getByRole("button", {
     name: "Reorder question 1",
     exact: true,
   });
   await handle.focus();
+  await expect(handle).toBeFocused();
   await page.keyboard.press("Space");
+  await expect(page.locator(".sortable-question").first()).toHaveClass(
+    /dragging/,
+  );
   await page.keyboard.press("ArrowDown");
+  await expect(page.locator(".sortable-question").nth(1)).toHaveClass(
+    /drop-target/,
+  );
   await page.keyboard.press("Space");
   await expect(page.locator(".sortable-question").first()).toContainText(
     "Long text question",
